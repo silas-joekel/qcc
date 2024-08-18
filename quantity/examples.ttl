@@ -1,0 +1,40 @@
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix : <http://example.com/> .
+
+:q1
+	a qudt:Quantity ;
+  qudt:hasQuantityKind quantitykind:Area ;
+	qudt:quantityValue :qv1-1 ;
+	qudt:quantityValue :qv1-2 ;
+.
+:qv1-1
+	a qudt:QuantityValue ;
+	qudt:hasUnit unit:M2 ;
+	qudt:value "4.2"^^xsd:decimal ;
+.
+:qv1-2
+	a qudt:QuantityValue ;
+	qudt:hasUnit unit:CM2 ;
+	qudt:value "4002"^^xsd:decimal ;
+.
+
+:q2
+	a qudt:Quantity ;
+  qudt:hasQuantityKind quantitykind:Area ;
+	qudt:hasUnit unit:M2 ;
+	qudt:value "4.2"^^xsd:decimal ;
+.
+
+:q3
+	a qudt:Quantity ;
+	qudt:quantityValue :qv3 ;
+.
+:qv3
+	a qudt:QuantityValue ;
+	qudt:hasUnit unit:HA ; # hectare
+	qudt:value "50"^^xsd:decimal ;
+.

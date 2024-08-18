@@ -1,0 +1,99 @@
+@prefix ex: <http://example.com/> .
+@prefix qcc: <http://qudt.org/qudt-constraint-components/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+
+ex:
+  a owl:Ontology ;
+  owl:imports qcc: ;
+.
+
+ex:MaterialShape
+  a sh:NodeShape ;
+  sh:targetClass ex:Material ;
+  sh:property [
+    sh:path rdfs:label ;
+    sh:minCount 1 ;
+    sh:datatype rdf:langString ;
+    sh:uniqueLang true ;
+  ] ;
+  sh:property [
+    sh:path ex:density ;
+    sh:class qudt:Quantity ;
+    qcc:hasQuantityKind quantitykind:Density ;
+    qcc:hasUnit unit:GM-PER-DeciM3 ;
+    qcc:unitIn (
+      unit:GM-PER-DeciM3   # Gram per dm³
+      unit:GM-PER-CentiM3  # Gram per cm³
+      unit:OZ-PER-IN3      # Ounces per in³
+    ) ;
+    qcc:maxQuantityValues 2 ;
+  ] ;
+.
+
+################################################################################
+##                                                                            ##
+## The following section is a copy of qcc and not actually part of the shapes ##
+##                                                                            ##
+################################################################################
+@prefix qcc: <http://qudt.org/qudt-constraint-components/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+#@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+#@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+#@prefix unit: <http://qudt.org/vocab/unit/> .
+#@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+qcc:
+  a owl:Ontology ;
+  owl:imports sh: ;
+.
+qcc:HasUnitConstraintComponent
+  a sh:ConstraintComponent ;
+  rdfs:comment "A constraint component that can be used to express a constraint for a quantity so that one of the quantity values must have the specified unit." ;
+  rdfs:label "Has unit constraint component" ;
+  sh:message "At least one of the quantity values must have the unit {$hasUnit}" ;
+  sh:parameter qcc:HasUnitConstraintComponent-hasUnit ;
+  sh:validator qcc:hasUnit ;
+  sh:nodeValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this
+WHERE {
+	FILTER NOT EXISTS {
+    $this <http://qudt.org/schema/qudt/hasUnit>|(<http://qudt.org/schema/qudt/quantityValue>/<http://qudt.org/schema/qudt/hasUnit>) $hasUnit .
+  }
+}""" ;
+  ] ;
+  sh:propertyValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this ?value
+WHERE {
+  $this $PATH ?value
+	FILTER NOT EXISTS {
+    ?value <http://qudt.org/schema/qudt/hasUnit>|(<http://qudt.org/schema/qudt/quantityValue>/<http://qudt.org/schema/qudt/hasUnit>) $hasUnit .
+  }
+}""" ;
+  ] ;
+.
+qcc:HasUnitConstraintComponent-hasUnit
+  a sh:Parameter ;
+  sh:path qcc:hasUnit ;
+  sh:class qudt:Unit ;
+  sh:description "One of the quantity values must have the given unit." ;
+  sh:name "has unit" ;
+  sh:nodeKind sh:IRI ;
+.
+qcc:hasUnit
+  a rdf:Property ;
+  rdfs:comment "Specifies a constraint that at least one of the quantity value of a quantity must have the given unit." ;
+  rdfs:label "has unit" ;
+  rdfs:range rdfs:Class ;
+.

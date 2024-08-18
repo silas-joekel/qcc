@@ -1,0 +1,29 @@
+@prefix ex: <http://example.com/> .
+@prefix qcc: <http://qudt.org/qudt-constraint-components/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+
+ex:
+  a owl:Ontology ;
+  owl:imports qcc: ;
+.
+
+ex:QuantityShape
+  a sh:NodeShape ;
+  sh:targetClass qudt:Quantity ;
+  qcc:hasQuantityKind quantitykind:Area ;
+  qcc:hasUnit unit:M2 ;
+  qcc:unitIn (
+    unit:M2   # square meter
+    unit:CM2  # square centimeter
+    unit:KM2  # square kilometer
+    unit:AC   # acre
+    unit:MI2  # square mile
+    unit:FT2  # square feet
+    unit:IN2  # square inches
+  ) ;
+  qcc:useQuantityValues true ;
+.

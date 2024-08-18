@@ -1,0 +1,117 @@
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix ex: <http://example.com/> .
+
+# Material `Gold`
+# unit & value directly attached to quantity
+# no quantity values linked
+ex:Gold
+	a ex:Material ;
+	rdfs:label "Gold"@en ;
+	ex:density ex:Gold_Density ;
+.
+ex:Gold_Density
+	a qudt:Quantity ;
+  	qudt:hasQuantityKind quantitykind:Density ;
+    qudt:hasUnit unit:GM-PER-DeciM3 ;
+    qudt:value "19300"^^xsd:decimal ;
+.
+
+# Material `Silver`
+# unit & value only in quantity values (not directly at quantity)
+# two quantity values with units gm/dm³ & oz/in³
+ex:Silver
+	a ex:Material ;
+	rdfs:label "Silver"@en ;
+	ex:density ex:Silver_Density ;
+.
+ex:Silver_Density
+	a qudt:Quantity ;
+  	qudt:hasQuantityKind quantitykind:Density ;
+	qudt:quantityValue ex:Silver_Density-GM-PER-DeciM3 ;
+	qudt:quantityValue ex:Silver_Density-OZ-PER-IN3 ;
+.
+ex:Silver_Density-GM-PER-DeciM3
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:GM-PER-DeciM3 ;
+    qudt:value "10490"^^xsd:decimal ;
+.
+ex:Silver_Density-OZ-PER-IN3
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:OZ-PER-IN3 ;
+    qudt:value "6.06360484"^^xsd:decimal ;
+.
+
+##### Invalid examples #####
+
+# Wrong value for hasQuantityKind
+ex:InvalidMaterial_hasQuantityKind
+	a ex:Material ;
+	rdfs:label "Invalid material (wrong quantity kind)"@en ;
+	ex:density ex:InvalidMaterial_hasQuantityKind_Density ;
+.
+ex:InvalidMaterial_hasQuantityKind_Density
+	a qudt:Quantity ;
+  	qudt:hasQuantityKind quantitykind:Area ;
+    qudt:hasUnit unit:GM-PER-DeciM3 ;
+    qudt:value "19300"^^xsd:decimal ;
+.
+
+# Doesn't have unit specified via qcc:hasUnit constraint
+ex:InvalidMaterial_hasUnit
+	a ex:Material ;
+	rdfs:label "Invalid material (doesn't have unit gm/dm³)"@en ;
+	ex:density ex:InvalidMaterial_hasUnit_Density ;
+.
+ex:InvalidMaterial_hasUnit_Density
+	a qudt:Quantity ;
+  	qudt:hasQuantityKind quantitykind:Density ;
+    qudt:hasUnit unit:GM-PER-CentiM3 ;
+    qudt:value "19.3"^^xsd:decimal ;
+.
+
+# Has unit that is now allowed
+ex:InvalidMaterial_unitIn
+	a ex:Material ;
+	rdfs:label "Invalid material (has not allowed unit gm/L)"@en ;
+	ex:density ex:InvalidMaterial_unitIn_Density ;
+.
+ex:InvalidMaterial_unitIn_Density
+	a qudt:Quantity ;
+  	qudt:hasQuantityKind quantitykind:Density ;
+    qudt:hasUnit unit:GM-PER-L ;
+    qudt:value "19300"^^xsd:decimal ;
+.
+
+# has too many quantity values
+ex:InvalidMaterial_maxQuantityValues
+	a ex:Material ;
+	rdfs:label "Invalid material (too many quantity values)"@en ;
+	ex:density ex:InvalidMaterial_maxQuantityValues_Density ;
+.
+ex:InvalidMaterial_maxQuantityValues_Density
+	a qudt:Quantity ;
+  	qudt:hasQuantityKind quantitykind:Density ;
+	qudt:quantityValue ex:InvalidMaterial_maxQuantityValues_Density-GM-PER-DeciM3 ;
+	qudt:quantityValue ex:InvalidMaterial_maxQuantityValues_Density-GM-PER-CentiM3 ;
+	qudt:quantityValue ex:InvalidMaterial_maxQuantityValues_Density-OZ-PER-IN3 ;
+.
+ex:InvalidMaterial_maxQuantityValues_Density-GM-PER-DeciM3
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:GM-PER-DeciM3 ;
+    qudt:value "10490"^^xsd:decimal ;
+.
+ex:InvalidMaterial_maxQuantityValues_Density-GM-PER-CentiM3
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:GM-PER-CentiM3 ;
+    qudt:value "10.49"^^xsd:decimal ;
+.
+ex:InvalidMaterial_maxQuantityValues_Density-OZ-PER-IN3
+    a qudt:QuantityValue ;
+    qudt:hasUnit unit:OZ-PER-IN3 ;
+    qudt:value "6.06360484"^^xsd:decimal ;
+.
