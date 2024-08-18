@@ -56,13 +56,13 @@ qcc:
   a owl:Ontology ;
   owl:imports sh: ;
 .
+
 qcc:HasUnitConstraintComponent
   a sh:ConstraintComponent ;
   rdfs:comment "A constraint component that can be used to express a constraint for a quantity so that one of the quantity values must have the specified unit." ;
   rdfs:label "Has unit constraint component" ;
   sh:message "At least one of the quantity values must have the unit {$hasUnit}" ;
   sh:parameter qcc:HasUnitConstraintComponent-hasUnit ;
-  sh:validator qcc:hasUnit ;
   sh:nodeValidator [
     a sh:SPARQLSelectValidator ;
     sh:select """SELECT $this
@@ -95,5 +95,44 @@ qcc:hasUnit
   a rdf:Property ;
   rdfs:comment "Specifies a constraint that at least one of the quantity value of a quantity must have the given unit." ;
   rdfs:label "has unit" ;
-  rdfs:range rdfs:Class ;
+  rdfs:range qudt:Unit ;
+.
+
+qcc:HasQuantityKindConstraintComponent
+  a sh:ConstraintComponent ;
+  rdfs:comment "A constraint component that can be used to express a constraint that a quantity must have the specified quantity kind." ;
+  rdfs:label "Has quanity kind constraint component" ;
+  sh:message "The quantity must have the quantity kind {$hasQuantityKind}" ;
+  sh:parameter qcc:HasQuantityKindConstraintComponent-hasQuantityKind ;
+  sh:nodeValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this
+WHERE {
+	$this <http://qudt.org/schema/qudt/hasQuantityKind> ?qk .
+  FILTER (?qk != $hasQuantityKind)
+}""" ;
+  ] ;
+  sh:propertyValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this ?value
+WHERE {
+  $this $PATH ?value .
+	?value <http://qudt.org/schema/qudt/hasQuantityKind> ?qk .
+  FILTER (?qk != $hasQuantityKind)
+}""" ;
+  ] ;
+.
+qcc:HasQuantityKindConstraintComponent-hasQuantityKind
+  a sh:Parameter ;
+  sh:path qcc:hasQuantityKind ;
+  sh:class qudt:QuantityKind ;
+  sh:description "The quantity must have the given quantity kind." ;
+  sh:name "has quantity kind" ;
+  sh:nodeKind sh:IRI ;
+.
+qcc:hasQuantityKind
+  a rdf:Property ;
+  rdfs:comment "Specifies a constraint that a quantity must have the specified quantity kind." ;
+  rdfs:label "has quantity kind" ;
+  rdfs:range qudt:QuantityKind ;
 .
