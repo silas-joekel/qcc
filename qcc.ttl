@@ -4,15 +4,16 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 #@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 #@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 #@prefix unit: <http://qudt.org/vocab/unit/> .
-#@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 qcc:
   a owl:Ontology ;
   owl:imports sh: ;
 .
+
 qcc:HasUnitConstraintComponent
   a sh:ConstraintComponent ;
   rdfs:comment "A constraint component that can be used to express a constraint for a quantity so that one of the quantity values must have the specified unit." ;
@@ -25,6 +26,16 @@ qcc:HasUnitConstraintComponent
 WHERE {
 	FILTER NOT EXISTS {
     $this <http://qudt.org/schema/qudt/hasUnit>|(<http://qudt.org/schema/qudt/quantityValue>/<http://qudt.org/schema/qudt/hasUnit>) $hasUnit .
+  }
+}""" ;
+  ] ;
+  sh:propertyValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this ?value
+WHERE {
+  $this $PATH ?value
+	FILTER NOT EXISTS {
+    ?value <http://qudt.org/schema/qudt/hasUnit>|(<http://qudt.org/schema/qudt/quantityValue>/<http://qudt.org/schema/qudt/hasUnit>) $hasUnit .
   }
 }""" ;
   ] ;
@@ -41,5 +52,136 @@ qcc:hasUnit
   a rdf:Property ;
   rdfs:comment "Specifies a constraint that at least one of the quantity value of a quantity must have the given unit." ;
   rdfs:label "has unit" ;
-  rdfs:range rdfs:Class ;
+  rdfs:range qudt:Unit ;
+.
+
+qcc:HasQuantityKindConstraintComponent
+  a sh:ConstraintComponent ;
+  rdfs:comment "A constraint component that can be used to express a constraint that a quantity must have the specified quantity kind." ;
+  rdfs:label "Has quanity kind constraint component" ;
+  sh:message "The quantity must have the quantity kind {$hasQuantityKind}" ;
+  sh:parameter qcc:HasQuantityKindConstraintComponent-hasQuantityKind ;
+  sh:nodeValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this
+WHERE {
+	$this <http://qudt.org/schema/qudt/hasQuantityKind> ?qk .
+  FILTER (?qk != $hasQuantityKind)
+}""" ;
+  ] ;
+  sh:propertyValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this ?value
+WHERE {
+  $this $PATH ?value .
+	?value <http://qudt.org/schema/qudt/hasQuantityKind> ?qk .
+  FILTER (?qk != $hasQuantityKind)
+}""" ;
+  ] ;
+.
+qcc:HasQuantityKindConstraintComponent-hasQuantityKind
+  a sh:Parameter ;
+  sh:path qcc:hasQuantityKind ;
+  sh:class qudt:QuantityKind ;
+  sh:description "The quantity must have the given quantity kind." ;
+  sh:name "has quantity kind" ;
+  sh:nodeKind sh:IRI ;
+.
+qcc:hasQuantityKind
+  a rdf:Property ;
+  rdfs:comment "Specifies a constraint that a quantity must have the specified quantity kind." ;
+  rdfs:label "has quantity kind" ;
+  rdfs:range qudt:QuantityKind ;
+.
+
+qcc:MaxQuantityValueConstraintComponent
+  a sh:ConstraintComponent ;
+  rdfs:comment "A constraint component that can be used to express a constraint that a quantity must have at most the specified amount of quantity values." ;
+  rdfs:label "Max quantity values constraint component" ;
+  sh:message "The quantity must have at most {$maxQuantityValues} quantity values" ;
+  sh:parameter qcc:MaxQuantityValueConstraintComponent-maxQuantityValues ;
+  sh:nodeValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this
+WHERE {
+	$this <http://qudt.org/schema/qudt/quantityValue> ?qv .
+}
+GROUP BY $this
+HAVING (COUNT(DISTINCT ?qv) > $maxQuantityValues)""" ;
+  ] ;
+  sh:propertyValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this ?value
+WHERE {
+  $this $PATH ?value .
+	?value <http://qudt.org/schema/qudt/quantityValue> ?qv .
+}
+GROUP BY $this ?value
+HAVING (COUNT(DISTINCT ?qv) > $maxQuantityValues)""" ;
+  ] ;
+.
+qcc:MaxQuantityValueConstraintComponent-maxQuantityValues
+  a sh:Parameter ;
+  sh:path qcc:maxQuantityValues ;
+  sh:datatype xsd:integer ;
+  sh:description "The quantity must have at most the given amount of quantity values." ;
+  sh:name "maxQuantityValues" ;
+  sh:nodeKind sh:Literal ;
+.
+qcc:maxQuantityValues
+  a rdf:Property ;
+  rdfs:comment "Specifies a constraint that a quantity must have at most the given amount of quantity values." ;
+  rdfs:label "max quantity values" ;
+  rdfs:range xsd:integer ;
+.
+
+qcc:UnitInConstraintComponent
+  a sh:ConstraintComponent ;
+  rdfs:comment "A constraint component that can be used to express a constraint for a quantity so that for all quantity values the units needs to be one of the given list of allowed units." ;
+  rdfs:label "Unit in constraint component" ;
+  sh:message "The unit of quantity values must match any of {$unitIn}" ;
+  sh:parameter qcc:UnitInConstraintComponent-unitIn ;
+  sh:nodeValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this
+WHERE {
+	FILTER NOT EXISTS {
+    $this <http://qudt.org/schema/qudt/hasUnit>|(<http://qudt.org/schema/qudt/quantityValue>/<http://qudt.org/schema/qudt/hasUnit>) $hasUnit .
+  }
+}""" ;
+    sh:select """SELECT $this
+WHERE {
+	FILTER NOT EXISTS {
+      $this <http://qudt.org/schema/qudt/hasUnit>|(<http://qudt.org/schema/qudt/quantityValue>/<http://qudt.org/schema/qudt/hasUnit>) ?allowedUnit .
+		GRAPH $shapesGraph {
+			$unitIn <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>*/<http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?allowedUnit .
+		}
+	}
+}""" ;
+  ] ;
+  sh:propertyValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this ?value
+WHERE {
+  $this $PATH ?value .
+	FILTER NOT EXISTS {
+      ?value <http://qudt.org/schema/qudt/hasUnit>|(<http://qudt.org/schema/qudt/quantityValue>/<http://qudt.org/schema/qudt/hasUnit>) ?allowedUnit .
+		GRAPH $shapesGraph {
+			$unitIn <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>*/<http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?allowedUnit .
+		}
+	}
+}""" ;
+  ] ;
+.
+qcc:UnitInConstraintComponent-unitIn
+  a sh:Parameter ;
+  sh:path qcc:unitIn ;
+  sh:description "The unit of quantity values must match any of given units." ;
+  sh:name "unit in" ;
+.
+qcc:unitIn
+  a rdf:Property ;
+  rdfs:comment "Specifies a constraint that the unit of a quantity value must match one of the given units." ;
+  rdfs:label "unit in" ;
+  rdfs:range qudt:Unit ;
 .
