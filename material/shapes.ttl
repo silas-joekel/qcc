@@ -47,10 +47,10 @@ ex:MaterialShape
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 #@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
 #@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 #@prefix unit: <http://qudt.org/vocab/unit/> .
-#@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 qcc:
   a owl:Ontology ;
@@ -135,4 +135,45 @@ qcc:hasQuantityKind
   rdfs:comment "Specifies a constraint that a quantity must have the specified quantity kind." ;
   rdfs:label "has quantity kind" ;
   rdfs:range qudt:QuantityKind ;
+.
+
+qcc:MaxQuantityValueConstraintComponent
+  a sh:ConstraintComponent ;
+  rdfs:comment "A constraint component that can be used to express a constraint that a quantity must have at most the specified amount of quantity values." ;
+  rdfs:label "Max quantity values constraint component" ;
+  sh:message "The quantity must have at most {$maxQuantityValues} quantity values" ;
+  sh:parameter qcc:MaxQuantityValueConstraintComponent-maxQuantityValues ;
+  sh:nodeValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this
+WHERE {
+	$this <http://qudt.org/schema/qudt/quantityValue> ?qv .
+}
+GROUP BY $this
+HAVING (COUNT(DISTINCT ?qv) > $maxQuantityValues)""" ;
+  ] ;
+  sh:propertyValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this ?value
+WHERE {
+  $this $PATH ?value .
+	?value <http://qudt.org/schema/qudt/quantityValue> ?qv .
+}
+GROUP BY $this ?value
+HAVING (COUNT(DISTINCT ?qv) > $maxQuantityValues)""" ;
+  ] ;
+.
+qcc:MaxQuantityValueConstraintComponent-maxQuantityValues
+  a sh:Parameter ;
+  sh:path qcc:maxQuantityValues ;
+  sh:datatype xsd:integer ;
+  sh:description "The quantity must have at most the given amount of quantity values." ;
+  sh:name "maxQuantityValues" ;
+  sh:nodeKind sh:Literal ;
+.
+qcc:maxQuantityValues
+  a rdf:Property ;
+  rdfs:comment "Specifies a constraint that a quantity must have at most the given amount of quantity values." ;
+  rdfs:label "max quantity values" ;
+  rdfs:range xsd:integer ;
 .
