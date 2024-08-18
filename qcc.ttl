@@ -185,3 +185,44 @@ qcc:unitIn
   rdfs:label "unit in" ;
   rdfs:range qudt:Unit ;
 .
+
+qcc:UseQuantityValuesConstraintComponent
+  a sh:ConstraintComponent ;
+  rdfs:comment "A constraint component that can be used to express a constraint for a quantity it has to use quantity values and can't have unit & value directly attached." ;
+  rdfs:label "Use quantity values constraint component" ;
+  sh:message "The quantity must use quantity values" ;
+  sh:parameter qcc:UseQuantityValuesConstraintComponent-useQuantityValues ;
+  sh:nodeValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this
+WHERE {
+	OPTIONAL { $this <http://qudt.org/schema/qudt/hasUnit> ?unit }
+	OPTIONAL { $this <http://qudt.org/schema/qudt/value> ?value }
+  FILTER (!$useQuantityValues || BOUND(?unit) || BOUND(?value))
+}""" ;
+  ] ;
+  sh:propertyValidator [
+    a sh:SPARQLSelectValidator ;
+    sh:select """SELECT $this ?value
+WHERE {
+  $this $PATH ?value
+	OPTIONAL { ?value <http://qudt.org/schema/qudt/hasUnit> ?unit }
+	OPTIONAL { ?value <http://qudt.org/schema/qudt/value> ?qValue }
+  FILTER (!$useQuantityValues || BOUND(?unit) || BOUND(?qValue))
+}""" ;
+  ] ;
+.
+qcc:UseQuantityValuesConstraintComponent-useQuantityValues
+  a sh:Parameter ;
+  sh:path qcc:useQuantityValues ;
+  sh:datatype xsd:boolean ;
+  sh:description "The quantity must use quantity values." ;
+  sh:name "use quantity values" ;
+  sh:nodeKind sh:Literal ;
+.
+qcc:useQuantityValues
+  a rdf:Property ;
+  rdfs:comment "Specifies a constraint that a quantity must use quantity values." ;
+  rdfs:label "use quantity values" ;
+  rdfs:range xsd:boolean ;
+.
